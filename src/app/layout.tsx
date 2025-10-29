@@ -1,4 +1,11 @@
 import "./globals.css";
+import { Michroma } from "next/font/google";
+
+const michroma = Michroma({
+  subsets: ["latin"],
+  weight: ["400"], // Michroma has only one weight
+  variable: "--font-michroma", // optional CSS variable name
+});
 
 export default function RootLayout({
   children,
@@ -6,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={` antialiased h-screen`}>{children}</body>
+    <html lang="en" className={michroma.variable}>
+      <body className={`antialiased h-screen ${michroma.className} `}>
+        {children}
+      </body>
     </html>
   );
 }
