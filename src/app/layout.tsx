@@ -1,3 +1,5 @@
+"use client";
+import { GlobalContextProvider } from "@/lib/context/global";
 import "./globals.css";
 import { Michroma } from "next/font/google";
 
@@ -13,10 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={michroma.variable}>
-      <body className={`antialiased h-screen ${michroma.className} `}>
-        {children}
-      </body>
-    </html>
+    <GlobalContextProvider>
+      <html lang="en" className={michroma.variable}>
+        <body className={`antialiased h-screen ${michroma.className} `}>
+          {children}
+        </body>
+      </html>
+    </GlobalContextProvider>
   );
 }

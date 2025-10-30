@@ -11,21 +11,21 @@ type Props = {
 
 export default function P5SketchWrapper({ sketch }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const p5InstanceRef = useRef<p5 | null>(null); // ✅ persistent ref
 
   useEffect(() => {
-    let p5Instance: p5 | null = null;
+    let isMounted = true;
 
     (async () => {
       const p5Module = await import("p5");
-      const p5 = p5Module.default;
+      const P5 = p5Module.default;
 
-      if (wrapperRef.current) {
+      if (isMounted && wrapperRef.current) {
         const { clientWidth, clientHeight } = wrapperRef.current;
 
         const wrappedSketch = (p: p5) => {
           sketch(p, clientWidth, clientHeight);
 
-          // 👇 keep canvas responsive when parent resizes
           p.windowResized = () => {
             if (wrapperRef.current) {
               const { clientWidth, clientHeight } = wrapperRef.current;
@@ -34,12 +34,18 @@ export default function P5SketchWrapper({ sketch }: Props) {
           };
         };
 
-        p5Instance = new p5(wrappedSketch, wrapperRef.current);
+        p5InstanceRef.current = new P5(wrappedSketch, wrapperRef.current); // ✅ store instance
       }
     })();
 
     return () => {
-      p5Instance?.remove();
+      isMounted = false;
+
+      // ✅ properly kill p5 instance on unmount
+      if (p5InstanceRef.current) {
+        p5InstanceRef.current.remove();
+        p5InstanceRef.current = null;
+      }
     };
   }, [sketch]);
 
