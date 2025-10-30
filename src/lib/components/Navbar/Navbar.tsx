@@ -10,6 +10,7 @@ const Navbar = () => {
           {["home", "about", "project", "contact"].map((v) => {
             return (
               <div
+              key={v}
                 onClick={() => {
                   setNavigation(v);
                 }}
