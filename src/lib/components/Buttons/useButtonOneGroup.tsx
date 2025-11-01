@@ -1,6 +1,10 @@
-import { useRef, useState } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 
-const useButtonOneGroup = () => {
+type useButtonOneGroupProps = {
+  setStartingPos: Dispatch<SetStateAction<Record<string, number>>>;
+};
+
+const useButtonOneGroup = ({ setStartingPos }: useButtonOneGroupProps) => {
   const [activeButton, setActiveButton] = useState<string>("");
 
   const originalData = useRef<
@@ -23,6 +27,19 @@ const useButtonOneGroup = () => {
       height: svg.getAttribute("height")!,
       paths,
     };
+  };
+
+  const handleButtonStartingPos = (id: string) => {
+    const button = document.getElementById(id);
+    if (!(button instanceof SVGSVGElement)) return;
+
+    console.log("new", button.getBoundingClientRect());
+
+    const buttonBoundingRect = button.getBoundingClientRect();
+    setStartingPos({
+      x: buttonBoundingRect.right,
+      y: buttonBoundingRect.top,
+    });
   };
 
   const scaleSVGViewBox = (SVG: SVGSVGElement, scale: number) => {
@@ -68,9 +85,9 @@ const useButtonOneGroup = () => {
     });
   };
 
-  const scaleSVGText = (original : number, scale : number) => {
-    return original * scale
-  } 
+  const scaleSVGText = (original: number, scale: number) => {
+    return original * scale;
+  };
 
   const scaleSVG = (id: string, scale: number) => {
     const SVG = document.getElementById(id);
@@ -80,10 +97,14 @@ const useButtonOneGroup = () => {
       return;
     }
 
+    console.log("old", SVG.getBoundingClientRect());
+
     recordOriginal(id, SVG);
     scaleSVGViewBox(SVG, scale);
     scaleSVGHeightAndWidth(SVG, scale);
     scaleSVGPathD(SVG, scale);
+
+    handleButtonStartingPos(id)
   };
 
   const resetSVG = (id: string) => {
@@ -99,7 +120,14 @@ const useButtonOneGroup = () => {
     paths.forEach((p, i) => p.setAttribute("d", data.paths[i]));
   };
 
-  return { activeButton, setActiveButton, scaleSVG, resetSVG, scaleSVGText };
+  return {
+    activeButton,
+    setActiveButton,
+    scaleSVG,
+    resetSVG,
+    scaleSVGText,
+    handleButtonStartingPos,
+  };
 };
 
 export default useButtonOneGroup;
