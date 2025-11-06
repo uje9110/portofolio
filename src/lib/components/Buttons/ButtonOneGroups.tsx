@@ -1,26 +1,19 @@
-import React, {
-  Dispatch,
-  FC,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { FC, RefObject, useEffect, useRef, useState } from "react";
 import useButtonOneGroup from "./useButtonOneGroup";
+
+const SCALE = 1.2;
 
 type ButtonOneGroupsProps = {
   titles: string[];
-  setStartingPos: Dispatch<SetStateAction<Record<string, number>>>;
+  SVGButtonsRef: RefObject<(SVGSVGElement | null)[]>;
 };
 
 const ButtonOneGroups: FC<ButtonOneGroupsProps> = ({
   titles,
-  setStartingPos,
+  SVGButtonsRef,
 }) => {
-  const SCALE = 1.2;
-
   const { activeButton, setActiveButton, scaleSVG, resetSVG, scaleSVGText } =
-    useButtonOneGroup({ setStartingPos });
+    useButtonOneGroup({SVGButtonsRef});
 
   useEffect(() => {
     titles.forEach((id) => resetSVG(id));
@@ -28,10 +21,15 @@ const ButtonOneGroups: FC<ButtonOneGroupsProps> = ({
   }, [activeButton]);
 
   return (
-    <div className="flex flex-col gap-2 w-fit">
-      {titles.map((t) => {
+    <div className="flex flex-col gap-2">
+      {titles.map((t, index) => {
         return (
           <svg
+            ref={(el) => {
+              if (SVGButtonsRef.current) {
+                SVGButtonsRef.current[index] = el;
+              }
+            }}
             key={t}
             id={t}
             className="transition-all duration-150 origin-top-left cursor-pointer group hover:scale-200"
@@ -62,11 +60,11 @@ const ButtonOneGroups: FC<ButtonOneGroupsProps> = ({
               stroke="white"
             />
             <text
-              x="25%"
+              x="30%"
               y="50%"
               dominantBaseline="middle"
               textAnchor="middle"
-              fontSize={activeButton === t ? scaleSVGText(14, 1.4) : 14}
+              fontSize={activeButton === t ? scaleSVGText(14, 1.2) : 14}
               fill="black"
             >
               {t}
