@@ -9,6 +9,8 @@ import {
 type GlobalContextType = {
   navigation: string;
   setNavigation: Dispatch<SetStateAction<string>>;
+  aboutNavigation: string;
+  setAboutNavigation: Dispatch<SetStateAction<string>>;
 };
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -19,8 +21,11 @@ export const GlobalContextProvider = ({
   children: React.ReactNode;
 }) => {
   const [navigation, setNavigation] = useState<string>("home");
+  const [aboutNavigation, setAboutNavigation] = useState<string>("me");
   return (
-    <GlobalContext.Provider value={{ navigation, setNavigation }}>
+    <GlobalContext.Provider
+      value={{ navigation, setNavigation, aboutNavigation, setAboutNavigation }}
+    >
       {children}
     </GlobalContext.Provider>
   );

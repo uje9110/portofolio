@@ -1,12 +1,18 @@
 "use client";
 import { GlobalContextProvider } from "@/lib/context/global";
 import "./globals.css";
-import { Michroma } from "next/font/google";
+import { Michroma, Space_Grotesk } from "next/font/google";
 
-const michroma = Michroma({
+export const michroma = Michroma({
   subsets: ["latin"],
   weight: ["400"], // Michroma has only one weight
   variable: "--font-michroma", // optional CSS variable name
+});
+
+export const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"], // you can pick whichever you need
+  variable: "--font-space",
 });
 
 export default function RootLayout({
@@ -16,8 +22,8 @@ export default function RootLayout({
 }>) {
   return (
     <GlobalContextProvider>
-      <html lang="en" className={michroma.variable}>
-        <body className={`antialiased h-screen ${michroma.className} `}>
+      <html className={`${michroma.className}`}>
+        <body className={`antialiased h-screen  `}>
           {children}
         </body>
       </html>

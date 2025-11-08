@@ -4,7 +4,7 @@ import React from "react";
 const Navbar = () => {
   const { navigation, setNavigation } = useGlobalContext();
   return (
-    <div className="flex justify-between gap-4  ">
+    <div className="flex justify-between gap-4 z-90">
       <div className="h-12 flex-1 ">
         <div className=" h-full flex gap-4 items-center justify-between ">
           {["home", "about", "project", "contact"].map((v) => {
@@ -18,7 +18,10 @@ const Navbar = () => {
                   navigation === v ? "bg-light-orange rounded-4xl" : "bg-white"
                 }`}
               >
+                <p className="text-michroma">
+
                 {v}
+                </p>
               </div>
             );
           })}

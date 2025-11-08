@@ -1,24 +1,88 @@
-import React, { useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import ButtonOneGroups from "../Buttons/ButtonOneGroups";
+import { animate, svg, utils } from "animejs";
+import { useGlobalContext } from "@/lib/context/global";
+import { AboutMe } from "./components/AboutMe/AboutMe";
+
+const getAboutContainerPolyline = (aboutRightContainerRect: DOMRect) => {
+  return [
+    {
+      point: `0,0 ${aboutRightContainerRect.width},0 ${aboutRightContainerRect.width},${aboutRightContainerRect.height}`,
+    },
+    {
+      point: `0,0 0,${aboutRightContainerRect.height} ${aboutRightContainerRect.width},${aboutRightContainerRect.height}`,
+    },
+  ];
+};
 
 const About = () => {
-  const SVGButtonsRef = useRef<(SVGSVGElement | null)[]>([]);
+  const { aboutNavigation } = useGlobalContext();
+  const AboutRightContainerRef = useRef<HTMLDivElement | null>(null);
+  const ContainerPolyline = useRef<(SVGPolylineElement | null)[]>([]);
+
+  const [aboutRightContainerRect, setAboutRightContainerRect] =
+    useState<DOMRect | null>(null);
+
+  useLayoutEffect(() => {
+    if (AboutRightContainerRef.current) {
+      setAboutRightContainerRect(
+        AboutRightContainerRef.current.getBoundingClientRect()
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!ContainerPolyline.current.length) return;
+
+    ContainerPolyline.current.forEach((line) => {
+      if (!line) return;
+
+      const drawable = svg.createDrawable(line);
+      utils.remove(drawable);
+
+      animate(drawable, {
+        draw: ["0 0", "0 1"],
+        duration: 500,
+        easing: "inOutQuad",
+        delay: 150,
+      });
+    });
+  }, [aboutRightContainerRect]);
 
   return (
-    <main className="p-4 text-white h-full flex-1 flex gap-6">
-      <div className="flex flex-col w-fit justify-between items-start h-full">
-        {/* Left */}
-        <ButtonOneGroups SVGButtonsRef={SVGButtonsRef}  titles={["Me", "Skills", "Gear", "Work"]} />
-        <div className="h-fit w-fit flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <div className="w-5/6 bg-white h-6"></div>
-            <div className="w-1/3 bg-white h-6"></div>
-            <div className="w-1/4 bg-white h-6"></div>
-          </div>
-          <div className="border border-white h-32 w-64"></div>
-        </div>
+    <main className="p-4 text-white relative h-full flex-1 flex gap-6">
+      {/* Left */}
+      <div className="flex flex-col w-1/6 justify-between items-start h-full z-20">
+        <ButtonOneGroups
+          titles={["Me", "Skills", "Gear", "Work"]}
+          aboutRightContainerRect={aboutRightContainerRect}
+        />
       </div>
-      <div className="border border-white flex-1"></div>
+
+      {/* Right */}
+      <div
+        ref={AboutRightContainerRef}
+        className="flex-1 z-30 relative p-4"
+      >
+        {aboutRightContainerRect && (
+          <svg className="w-full h-full z-10 absolute top-0 left-0">
+            {getAboutContainerPolyline(aboutRightContainerRect).map((p, i) => (
+              <polyline
+                key={i}
+                ref={(el) => {
+                  if (ContainerPolyline.current)
+                    ContainerPolyline.current[i] = el;
+                }}
+                fill="none"
+                stroke="white"
+                strokeWidth={2}
+                points={p.point}
+              />
+            ))}
+          </svg>
+        )}
+        <div>{aboutNavigation === "Me" && <AboutMe />}</div>
+      </div>
     </main>
   );
 };

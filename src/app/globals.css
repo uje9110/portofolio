@@ -10,8 +10,6 @@
   --color-accent-white: var(--accent-white);
   --color-dark-navy: var(--dark-navy);
   --color-light-orange: var(--light-orange);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {

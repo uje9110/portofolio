@@ -6,7 +6,11 @@ type useButtonOneGroupProps = {
 
 const useButtonOneGroup = ({ SVGButtonsRef }: useButtonOneGroupProps) => {
   const [activeButton, setActiveButton] = useState<string>("");
+  const [activeButtonRect, setActiveButtonRect] = useState<DOMRect | null>(
+    null
+  );
 
+  // Original Data
   const originalData = useRef<
     Record<string, { viewBox: string; width: string; height: string }>
   >({});
@@ -21,6 +25,14 @@ const useButtonOneGroup = ({ SVGButtonsRef }: useButtonOneGroupProps) => {
     };
   };
 
+  // Assign active button rect
+  const assignActiveButtonRect = (SVG: SVGSVGElement) => {
+    setTimeout(() => {
+      setActiveButtonRect(SVG.getBoundingClientRect());
+    }, 150);
+  };
+
+  // Scale Button
   const scaleSVGHeightAndWidth = (SVG: SVGSVGElement, scale: number) => {
     const svgHeight = SVG.getAttribute("height");
     const svgWidth = SVG.getAttribute("width");
@@ -39,9 +51,10 @@ const useButtonOneGroup = ({ SVGButtonsRef }: useButtonOneGroupProps) => {
   const scaleSVG = (id: string, scale: number) => {
     const SVG = SVGButtonsRef.current.find((b) => b?.id === id);
     if (!SVG) return;
-
+    
     recordOriginal(id, SVG);
     scaleSVGHeightAndWidth(SVG, scale);
+    assignActiveButtonRect(SVG);
   };
 
   // Modified resetSVG
@@ -62,7 +75,7 @@ const useButtonOneGroup = ({ SVGButtonsRef }: useButtonOneGroupProps) => {
     scaleSVG,
     resetSVG,
     scaleSVGText,
-    handleButtonStartingPos,
+    activeButtonRect,
   };
 };
 
