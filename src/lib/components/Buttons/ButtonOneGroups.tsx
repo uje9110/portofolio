@@ -11,14 +11,13 @@ import { animate, svg, utils } from "animejs";
 import { useGlobalContext } from "@/lib/context/global";
 
 const SCALE = 1.2;
+const TITLES = ["Me", "Skills", "Gear", "Work"];
 
 type ButtonOneGroupsProps = {
-  titles: string[];
   aboutRightContainerRect: DOMRect | null;
 };
 
 const ButtonOneGroups: FC<ButtonOneGroupsProps> = ({
-  titles,
   aboutRightContainerRect,
 }) => {
   const { setAboutNavigation } = useGlobalContext();
@@ -41,7 +40,7 @@ const ButtonOneGroups: FC<ButtonOneGroupsProps> = ({
 
   // Button activation
   useEffect(() => {
-    titles.forEach((id) => resetSVG(id));
+    TITLES.forEach((id) => resetSVG(id));
     if (activeButton) {
       scaleSVG(activeButton, SCALE);
     }
@@ -80,7 +79,7 @@ const ButtonOneGroups: FC<ButtonOneGroupsProps> = ({
         />
       </svg>
       <div className="flex flex-col gap-2 z-20">
-        {titles.map((t, index) => {
+        {TITLES.map((t, index) => {
           return (
             <svg
               ref={(el) => {

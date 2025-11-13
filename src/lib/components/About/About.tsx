@@ -7,10 +7,14 @@ import { AboutMe } from "./components/AboutMe/AboutMe";
 const getAboutContainerPolyline = (aboutRightContainerRect: DOMRect) => {
   return [
     {
-      point: `0,0 ${aboutRightContainerRect.width},0 ${aboutRightContainerRect.width},${aboutRightContainerRect.height}`,
+      point: `0,0 ${aboutRightContainerRect.width - 1},0 ${
+        aboutRightContainerRect.width - 1
+      },${aboutRightContainerRect.height - 1}`,
     },
     {
-      point: `0,0 0,${aboutRightContainerRect.height} ${aboutRightContainerRect.width},${aboutRightContainerRect.height}`,
+      point: `0,0 0,${aboutRightContainerRect.height - 1} ${
+        aboutRightContainerRect.width - 1
+      },${aboutRightContainerRect.height - 1}`,
     },
   ];
 };
@@ -53,17 +57,11 @@ const About = () => {
     <main className="p-4 text-white relative h-full flex-1 flex gap-6">
       {/* Left */}
       <div className="flex flex-col w-1/6 justify-between items-start h-full z-20">
-        <ButtonOneGroups
-          titles={["Me", "Skills", "Gear", "Work"]}
-          aboutRightContainerRect={aboutRightContainerRect}
-        />
+        <ButtonOneGroups aboutRightContainerRect={aboutRightContainerRect} />
       </div>
 
       {/* Right */}
-      <div
-        ref={AboutRightContainerRef}
-        className="flex-1 z-30 relative p-4"
-      >
+      <div ref={AboutRightContainerRef} className="flex-1 z-30 relative p-4">
         {aboutRightContainerRect && (
           <svg className="w-full h-full z-10 absolute top-0 left-0">
             {getAboutContainerPolyline(aboutRightContainerRect).map((p, i) => (
