@@ -1,44 +1,55 @@
 "use client";
-import About from "@/lib/components/About/About";
-import Navbar from "@/lib/components/Navbar/Navbar";
 import P5SketchWrapper from "@/lib/components/P5SketchWrapper";
-import { useGlobalContext } from "@/lib/context/global";
 import { rectTunnelSketch } from "@/lib/sketches/rectTunnel/rectTunnel-sketch";
 import { animate } from "animejs";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-const page = () => {
+const THRESHOLD = 3800; // <-- how much scroll required to change page
+
+const Page = () => {
   const MainWrapperRef = useRef<HTMLDivElement | null>(null);
-
-  const scrollValue = useRef(0); // keep scroll value persistent between renders
-
-  console.log(MainWrapperRef.current);
+  const scrollRef = useRef<number>(0);
+  const scrollAccum = useRef<number>(0); // accumulate scroll
+  const zoomRef = useRef<number>(1);
+  const [section, setSection] = useState(0); // 0 = first page, 1 = next page ...
 
   useEffect(() => {
     if (!MainWrapperRef.current) return;
 
-    // Start from Tailwind sizes
     let currentWidth = 95;
     let currentHeight = 91;
 
     const handleWheel = (e: WheelEvent) => {
       if (!MainWrapperRef.current) return;
+      scrollRef.current = e.deltaY;
 
-      // Convert deltaY into a smooth zoom factor
-      const zoomChange = e.deltaY * -0.01; // adjust sensitivity
+      // accumulate scroll
+      scrollAccum.current += e.deltaY;
 
-      // Apply zoom
+      // scrolling down enough → next section
+      if (scrollAccum.current > THRESHOLD) {
+        setSection((prev) => Math.max(0, prev - 1));
+        scrollAccum.current = 0; // reset
+      }
+
+      // scrolling up enough → previous section
+      if (scrollAccum.current < -THRESHOLD) {
+        setSection((prev) => prev + 1);
+        scrollAccum.current = 0; // reset
+      }
+
+      // zoom effect
+      const zoomChange = e.deltaY * -0.01;
       currentWidth += zoomChange;
       currentHeight += zoomChange;
 
-      // Clamp between Tailwind min and 100%
       currentWidth = Math.min(100, Math.max(95, currentWidth));
       currentHeight = Math.min(100, Math.max(91, currentHeight));
 
-      // Animate with Anime.js v4
       animate(MainWrapperRef.current, {
         width: `${currentWidth}%`,
         height: `${currentHeight}%`,
+        backgroundColor: "#4D5564",
         duration: 200,
         easing: "easeOutQuad",
       });
@@ -52,21 +63,30 @@ const page = () => {
     <main className="flex items-center justify-center h-full w-full">
       <div
         ref={MainWrapperRef}
-        className="overflow-hidden rounded-lg "
-        style={{
-          width: "95%",
-          height: "91%",
-        }}
+        className="overflow-hidden rounded-lg"
+        style={{ width: "95%", height: "91%", backgroundColor: "#121C2E" }}
       >
-        <div ref={MainWrapperRef} className="w-full h-screen overflow-hidden">
-          <P5SketchWrapper
-            sketch={rectTunnelSketch}
-            containerRef={MainWrapperRef}
-          />
-        </div>
+        {/* SECTION 0 */}
+        {section === 0 && (
+          <div className="w-full h-full">
+            <P5SketchWrapper
+              scrollRef={scrollRef}
+              zoomRef={zoomRef}
+              sketch={rectTunnelSketch}
+              containerRef={MainWrapperRef}
+            />
+          </div>
+        )}
+
+        {/* SECTION 1 */}
+        {section === 1 && (
+          <div className="w-full h-screen bg-[#4D5564] text-white flex items-center justify-center text-4xl">
+            Second Section (scroll more…)
+          </div>
+        )}
       </div>
     </main>
   );
 };
 
-export default page;
+export default Page;

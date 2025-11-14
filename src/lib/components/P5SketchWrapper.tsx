@@ -1,20 +1,31 @@
 import p5 from "p5";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, RefObject } from "react";
 
-type Sketch = (p: p5, width: number, height: number) => void;
+type Sketch = (
+  p: p5,
+  width: number,
+  height: number,
+  scrollRef?: RefObject<number>,
+  zoomRef?: RefObject<number>
+) => void;
 
 type Props = {
   sketch: Sketch;
   containerRef?: React.RefObject<HTMLDivElement | null>;
+  scrollRef?: RefObject<number>;
+  zoomRef?: RefObject<number>;
 };
 
-export default function P5SketchWrapper({ sketch, containerRef }: Props) {
+export default function P5SketchWrapper({
+  sketch,
+  containerRef,
+  scrollRef,
+  zoomRef,
+}: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const p5InstanceRef = useRef<p5 | null>(null);
 
   useEffect(() => {
-    console.log(containerRef);
-    
     let isMounted = true;
 
     const init = async () => {
@@ -31,7 +42,7 @@ export default function P5SketchWrapper({ sketch, containerRef }: Props) {
 
       const { width, height } = getSize();
       const wrappedSketch = (p: p5) => {
-        sketch(p, width, height);
+        sketch(p, width, height, scrollRef, zoomRef);
       };
 
       const instance = new P5(wrappedSketch, wrapperRef.current);
