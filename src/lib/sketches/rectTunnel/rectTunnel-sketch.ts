@@ -1,14 +1,6 @@
-  import p5 from "p5";
-  import { Rect } from "./RectTunnel";
-  import { RefObject } from "react";
-  const bk_lines = [
-    "I'm an avid, self-learning",
-    "Fullstack Web Developer",
-    "who thrives on discovering new things",
-    "and immediately applying",
-    "that knowledge to my work.",
-  ];
-  const lines = ["Fullstack Web Developer"];
+import p5 from "p5";
+import { Rect } from "./RectTunnel";
+import { RefObject } from "react";
 
 export const rectTunnelSketch = (
   p: p5,
@@ -31,15 +23,16 @@ export const rectTunnelSketch = (
   p.setup = async () => {
     customFont = await p.loadFont("/fonts/Space_Grotesk.ttf");
     p.colorMode(p.HSB, 360, 100, 100, 255);
-    p.createCanvas(w, h);
+    p.createCanvas(w, h, p.WEBGL);
     p.rectMode(p.CENTER);
 
+    // Build layered rectangles
     for (let r = 0; r < rectAmount; r++) {
-      const opacity = 15 * (1 - r / rectAmount);
+      const z = p.map(r, 0, rectAmount - 1, rectAmount - 1, 0);
       const t = r / 7;
       const rw = p.lerp(w * 0.25, w * 1, t);
       const rh = p.lerp(h * 0.25, h * 1, t);
-      rects.push(new Rect(p, rw, rh, opacity));
+      rects.push(new Rect(p, rw, rh, z));
     }
 
     const innerRectWidth = rects[0].w;
@@ -48,7 +41,6 @@ export const rectTunnelSketch = (
     minZoom = 1;
     maxZoom = outerRectWidth / innerRectWidth;
 
-    // 🔥 If zoomRef has a value, use it as initial zoom
     if (zoomRef?.current) {
       zoom = zoomRef.current;
       targetZoom = zoomRef.current;
@@ -67,10 +59,7 @@ export const rectTunnelSketch = (
   p.draw = () => {
     p.background(10, 20, 40);
 
-    // Smooth zoom animation
     zoom = p.lerp(zoom, targetZoom, 0.1);
-
-    // 🔥 Save the *updated* zoom value for outside use
     if (zoomRef) zoomRef.current = zoom;
 
     const linesBetween = 6;
@@ -79,19 +68,12 @@ export const rectTunnelSketch = (
     for (let i = 0; i < rects.length - 1; i++) {
       const r = rects[i];
       const nextR = rects[i + 1];
-      const factor = 1 - i / (rects.length - 1);
+      const t = i / (rects.length - 1);
 
-      r.drawRect(p, factor, movementScale, zoom);
-      r.drawLines(
-        p,
-        i,
-        rects.length,
-        movementScale,
-        zoom,
-        linesBetween,
-        nextR
-      );
+      let color = p.color(255, p.lerp(0, 40, t));
+
+      r.drawRect(p, movementScale, zoom, color);
+      r.drawLines(p, movementScale, zoom, linesBetween, nextR);
     }
   };
 };
-
