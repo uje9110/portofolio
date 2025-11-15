@@ -2,6 +2,107 @@ import p5 from "p5";
 import { Rect } from "./RectTunnel";
 import { RefObject } from "react";
 
+function drawRectFace(
+  p: p5,
+  rect: Rect,
+  movementScale: number,
+  zoom: number,
+  fillColor: p5.Color
+) {
+  const factor = rect.z / 10;
+
+  const offsetX = p.map(p.mouseX, 0, p.width, -50, 50) * factor * movementScale;
+  const offsetY =
+    p.map(p.mouseY, 0, p.height, -50, 50) * factor * movementScale;
+
+  p.push();
+  p.scale(zoom);
+  p.translate(offsetX, offsetY);
+
+  p.fill(fillColor);
+  p.stroke(255, 150);
+
+  p.beginShape();
+  for (const c of rect.corners) {
+    p.vertex(c.x, c.y, rect.z);
+  }
+  p.endShape(p.CLOSE);
+
+  p.pop();
+}
+
+function drawBatchedLines(
+  p: p5,
+  rects: Rect[],
+  movementScale: number,
+  zoom: number,
+  linesBetween: number
+) {
+  p.push();
+  p.scale(zoom);
+  p.stroke(255, 150);
+  p.noFill();
+
+  p.beginShape(p.LINES);
+
+  for (let i = 0; i < rects.length - 1; i++) {
+    const a = rects[i];
+    const b = rects[i + 1];
+
+    const factorA = a.z / 10;
+    const factorB = b.z / 10;
+
+    const offsetAX =
+      p.map(p.mouseX, 0, p.width, -50, 50) * factorA * movementScale;
+    const offsetAY =
+      p.map(p.mouseY, 0, p.height, -50, 50) * factorA * movementScale;
+
+    const offsetBX =
+      p.map(p.mouseX, 0, p.width, -50, 50) * factorB * movementScale;
+    const offsetBY =
+      p.map(p.mouseY, 0, p.height, -50, 50) * factorB * movementScale;
+
+    const rectA = a.corners.map((c) => ({
+      x: c.x + offsetAX,
+      y: c.y + offsetAY,
+    }));
+    const rectB = b.corners.map((c) => ({
+      x: c.x + offsetBX,
+      y: c.y + offsetBY,
+    }));
+
+    // corner → corner
+    for (let j = 0; j < 4; j++) {
+      p.vertex(rectA[j].x, rectA[j].y, a.z);
+      p.vertex(rectB[j].x, rectB[j].y, b.z);
+    }
+
+    // internal lines
+    for (let j = 0; j < 4; j++) {
+      const c1 = rectA[j];
+      const c2 = rectA[(j + 1) % 4];
+      const n1 = rectB[j];
+      const n2 = rectB[(j + 1) % 4];
+
+      for (let k = 1; k < linesBetween; k++) {
+        const t = k / linesBetween;
+
+        const xA = p.lerp(c1.x, c2.x, t);
+        const yA = p.lerp(c1.y, c2.y, t);
+
+        const xB = p.lerp(n1.x, n2.x, t);
+        const yB = p.lerp(n1.y, n2.y, t);
+
+        p.vertex(xA, yA, a.z);
+        p.vertex(xB, yB, b.z);
+      }
+    }
+  }
+
+  p.endShape();
+  p.pop();
+}
+
 export const rectTunnelSketch = (
   p: p5,
   w: number,
@@ -32,7 +133,7 @@ export const rectTunnelSketch = (
       const t = r / 7;
       const rw = p.lerp(w * 0.25, w * 1, t);
       const rh = p.lerp(h * 0.25, h * 1, t);
-      rects.push(new Rect(p, rw, rh, z));
+      rects.push(new Rect(rw, rh, z));
     }
 
     const innerRectWidth = rects[0].w;
@@ -65,15 +166,16 @@ export const rectTunnelSketch = (
     const linesBetween = 6;
     const movementScale = p.map(zoom, minZoom, maxZoom, 1, 0.1, true);
 
+    // draw rect faces normally
     for (let i = 0; i < rects.length - 1; i++) {
       const r = rects[i];
-      const nextR = rects[i + 1];
       const t = i / (rects.length - 1);
+      const color = p.color(255, p.lerp(0, 40, t));
 
-      let color = p.color(255, p.lerp(0, 40, t));
-
-      r.drawRect(p, movementScale, zoom, color);
-      r.drawLines(p, movementScale, zoom, linesBetween, nextR);
+      drawRectFace(p, rects[i], movementScale, zoom, color);
     }
+
+    // ❗ now draw ALL lines in ONE call
+    drawBatchedLines(p, rects, movementScale, zoom, linesBetween);
   };
 };
