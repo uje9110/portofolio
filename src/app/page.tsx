@@ -14,54 +14,56 @@ const Page = () => {
   const mousePosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const [section, setSection] = useState(0);
 
-  const handleWheel = (e: WheelEvent) => {
+  useEffect(() => {
     if (!MainWrapperRef.current) return;
     let currentWidth = 95;
     let currentHeight = 91;
-    scrollRef.current = e.deltaY;
 
-    // accumulate scroll
-    scrollAccum.current += e.deltaY;
+    const handleWheel = (e: WheelEvent) => {
+      if (!MainWrapperRef.current) return;
 
-    // scrolling down enough → next section
-    if (scrollAccum.current > THRESHOLD) {
-      setSection((prev) => Math.max(0, prev - 1));
-      scrollAccum.current = 0;
-    }
+      scrollRef.current = e.deltaY;
 
-    // scrolling up enough → previous section
-    if (scrollAccum.current < -THRESHOLD) {
-      setSection((prev) => prev + 1);
-      scrollAccum.current = 0;
-    }
+      // accumulate scroll
+      scrollAccum.current += e.deltaY;
 
-    // zoom effect
-    const zoomChange = e.deltaY * -0.01;
-    currentWidth += zoomChange;
-    currentHeight += zoomChange;
+      // scrolling down enough → next section
+      if (scrollAccum.current > THRESHOLD) {
+        setSection((prev) => Math.max(0, prev - 1));
+        scrollAccum.current = 0;
+      }
 
-    currentWidth = Math.min(100, Math.max(95, currentWidth));
-    currentHeight = Math.min(100, Math.max(91, currentHeight));
+      // scrolling up enough → previous section
+      if (scrollAccum.current < -THRESHOLD) {
+        setSection((prev) => prev + 1);
+        scrollAccum.current = 0;
+      }
 
-    animate(MainWrapperRef.current, {
-      width: `${currentWidth}%`,
-      height: `${currentHeight}%`,
-      backgroundColor: "#4D5564",
-      duration: 200,
-      easing: "easeOutQuad",
-    });
-  };
+      // zoom effect
+      const zoomChange = e.deltaY * -0.01;
 
-  const handleMouse = (e: MouseEvent) => {
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+      currentWidth += zoomChange;
+      currentHeight += zoomChange;
 
-    mousePosRef.current.x = mouseX;
-    mousePosRef.current.y = mouseY;
-  };
+      currentWidth = Math.min(100, Math.max(95, currentWidth));
+      currentHeight = Math.min(100, Math.max(91, currentHeight));
 
-  useEffect(() => {
-    if (!MainWrapperRef.current) return;
+      animate(MainWrapperRef.current, {
+        width: `${currentWidth}%`,
+        height: `${currentHeight}%`,
+        backgroundColor: "#4D5564",
+        duration: 200,
+        easing: "easeOutQuad",
+      });
+    };
+
+    const handleMouse = (e: MouseEvent) => {
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      mousePosRef.current.x = mouseX;
+      mousePosRef.current.y = mouseY;
+    };
 
     window.addEventListener("mousemove", handleMouse);
     window.addEventListener("wheel", handleWheel, { passive: true });
@@ -70,8 +72,6 @@ const Page = () => {
       window.removeEventListener("wheel", handleWheel);
     };
   }, []);
-
-  
 
   return (
     <main className="flex items-center justify-center h-full w-full">

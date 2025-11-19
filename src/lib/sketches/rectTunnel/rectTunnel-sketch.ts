@@ -13,9 +13,9 @@ function drawRectFace(
   const factor = rect.z / 10;
 
   const offsetX =
-    p.map(mousePos.x, 0, p.width, -50, 50) * factor * movementScale;
+    p.map(mousePos.x, 0, p.width, -80, 80) * factor * movementScale;
   const offsetY =
-    p.map(mousePos.y, 0, p.height, -50, 50) * factor * movementScale;
+    p.map(mousePos.y, 0, p.height, -80, 80) * factor * movementScale;
 
   p.push();
   p.scale(zoom);
@@ -56,14 +56,14 @@ function drawBatchedLines(
     const factorB = b.z / 10;
 
     const offsetAX =
-      p.map(mousePos.x, 0, p.width, -50, 50) * factorA * movementScale;
+      p.map(mousePos.x, 0, p.width, -80, 80) * factorA * movementScale;
     const offsetAY =
-      p.map(mousePos.y, 0, p.height, -50, 50) * factorA * movementScale;
+      p.map(mousePos.y, 0, p.height, -80, 80) * factorA * movementScale;
 
     const offsetBX =
-      p.map(mousePos.x, 0, p.width, -50, 50) * factorB * movementScale;
+      p.map(mousePos.x, 0, p.width, -80, 80) * factorB * movementScale;
     const offsetBY =
-      p.map(mousePos.y, 0, p.height, -50, 50) * factorB * movementScale;
+      p.map(mousePos.y, 0, p.height, -80, 80) * factorB * movementScale;
 
     const rectA = a.corners.map((c) => ({
       x: c.x + offsetAX,
