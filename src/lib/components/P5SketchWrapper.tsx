@@ -6,7 +6,8 @@ type Sketch = (
   width: number,
   height: number,
   scrollRef?: RefObject<number>,
-  zoomRef?: RefObject<number>
+  zoomRef?: RefObject<number>,
+  mousePosRef?: RefObject<{ x: number; y: number }>
 ) => void;
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
   containerRef?: React.RefObject<HTMLDivElement | null>;
   scrollRef?: RefObject<number>;
   zoomRef?: RefObject<number>;
+  mousePosRef?: RefObject<{ x: number; y: number }>;
 };
 
 export default function P5SketchWrapper({
@@ -21,6 +23,7 @@ export default function P5SketchWrapper({
   containerRef,
   scrollRef,
   zoomRef,
+  mousePosRef,
 }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const p5InstanceRef = useRef<p5 | null>(null);
@@ -42,7 +45,7 @@ export default function P5SketchWrapper({
 
       const { width, height } = getSize();
       const wrappedSketch = (p: p5) => {
-        sketch(p, width, height, scrollRef, zoomRef);
+        sketch(p, width, height, scrollRef, zoomRef, mousePosRef);
       };
 
       const instance = new P5(wrappedSketch, wrapperRef.current);

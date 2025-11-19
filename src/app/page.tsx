@@ -4,60 +4,74 @@ import { rectTunnelSketch } from "@/lib/sketches/rectTunnel/rectTunnel-sketch";
 import { animate } from "animejs";
 import React, { useEffect, useRef, useState } from "react";
 
-const THRESHOLD = 3800; // <-- how much scroll required to change page
+const THRESHOLD = 3800;
 
 const Page = () => {
   const MainWrapperRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<number>(0);
-  const scrollAccum = useRef<number>(0); // accumulate scroll
+  const scrollAccum = useRef<number>(0);
   const zoomRef = useRef<number>(1);
-  const [section, setSection] = useState(0); // 0 = first page, 1 = next page ...
+  const mousePosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [section, setSection] = useState(0);
+
+  const handleWheel = (e: WheelEvent) => {
+    if (!MainWrapperRef.current) return;
+    let currentWidth = 95;
+    let currentHeight = 91;
+    scrollRef.current = e.deltaY;
+
+    // accumulate scroll
+    scrollAccum.current += e.deltaY;
+
+    // scrolling down enough → next section
+    if (scrollAccum.current > THRESHOLD) {
+      setSection((prev) => Math.max(0, prev - 1));
+      scrollAccum.current = 0;
+    }
+
+    // scrolling up enough → previous section
+    if (scrollAccum.current < -THRESHOLD) {
+      setSection((prev) => prev + 1);
+      scrollAccum.current = 0;
+    }
+
+    // zoom effect
+    const zoomChange = e.deltaY * -0.01;
+    currentWidth += zoomChange;
+    currentHeight += zoomChange;
+
+    currentWidth = Math.min(100, Math.max(95, currentWidth));
+    currentHeight = Math.min(100, Math.max(91, currentHeight));
+
+    animate(MainWrapperRef.current, {
+      width: `${currentWidth}%`,
+      height: `${currentHeight}%`,
+      backgroundColor: "#4D5564",
+      duration: 200,
+      easing: "easeOutQuad",
+    });
+  };
+
+  const handleMouse = (e: MouseEvent) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    mousePosRef.current.x = mouseX;
+    mousePosRef.current.y = mouseY;
+  };
 
   useEffect(() => {
     if (!MainWrapperRef.current) return;
 
-    let currentWidth = 95;
-    let currentHeight = 91;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (!MainWrapperRef.current) return;
-      scrollRef.current = e.deltaY;
-
-      // accumulate scroll
-      scrollAccum.current += e.deltaY;
-
-      // scrolling down enough → next section
-      if (scrollAccum.current > THRESHOLD) {
-        setSection((prev) => Math.max(0, prev - 1));
-        scrollAccum.current = 0; // reset
-      }
-
-      // scrolling up enough → previous section
-      if (scrollAccum.current < -THRESHOLD) {
-        setSection((prev) => prev + 1);
-        scrollAccum.current = 0; // reset
-      }
-
-      // zoom effect
-      const zoomChange = e.deltaY * -0.01;
-      currentWidth += zoomChange;
-      currentHeight += zoomChange;
-
-      currentWidth = Math.min(100, Math.max(95, currentWidth));
-      currentHeight = Math.min(100, Math.max(91, currentHeight));
-
-      animate(MainWrapperRef.current, {
-        width: `${currentWidth}%`,
-        height: `${currentHeight}%`,
-        backgroundColor: "#4D5564",
-        duration: 200,
-        easing: "easeOutQuad",
-      });
-    };
-
+    window.addEventListener("mousemove", handleMouse);
     window.addEventListener("wheel", handleWheel, { passive: true });
-    return () => window.removeEventListener("wheel", handleWheel);
+    return () => {
+      window.removeEventListener("mousemove", handleMouse);
+      window.removeEventListener("wheel", handleWheel);
+    };
   }, []);
+
+  
 
   return (
     <main className="flex items-center justify-center h-full w-full">
@@ -74,6 +88,7 @@ const Page = () => {
               zoomRef={zoomRef}
               sketch={rectTunnelSketch}
               containerRef={MainWrapperRef}
+              mousePosRef={mousePosRef}
             />
           </div>
         )}

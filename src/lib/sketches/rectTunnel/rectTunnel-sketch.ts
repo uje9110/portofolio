@@ -7,13 +7,15 @@ function drawRectFace(
   rect: Rect,
   movementScale: number,
   zoom: number,
+  mousePos: { x: number; y: number },
   fillColor: p5.Color
 ) {
   const factor = rect.z / 10;
 
-  const offsetX = p.map(p.mouseX, 0, p.width, -50, 50) * factor * movementScale;
+  const offsetX =
+    p.map(mousePos.x, 0, p.width, -50, 50) * factor * movementScale;
   const offsetY =
-    p.map(p.mouseY, 0, p.height, -50, 50) * factor * movementScale;
+    p.map(mousePos.y, 0, p.height, -50, 50) * factor * movementScale;
 
   p.push();
   p.scale(zoom);
@@ -36,6 +38,7 @@ function drawBatchedLines(
   rects: Rect[],
   movementScale: number,
   zoom: number,
+  mousePos: { x: number; y: number },
   linesBetween: number
 ) {
   p.push();
@@ -53,14 +56,14 @@ function drawBatchedLines(
     const factorB = b.z / 10;
 
     const offsetAX =
-      p.map(p.mouseX, 0, p.width, -50, 50) * factorA * movementScale;
+      p.map(mousePos.x, 0, p.width, -50, 50) * factorA * movementScale;
     const offsetAY =
-      p.map(p.mouseY, 0, p.height, -50, 50) * factorA * movementScale;
+      p.map(mousePos.y, 0, p.height, -50, 50) * factorA * movementScale;
 
     const offsetBX =
-      p.map(p.mouseX, 0, p.width, -50, 50) * factorB * movementScale;
+      p.map(mousePos.x, 0, p.width, -50, 50) * factorB * movementScale;
     const offsetBY =
-      p.map(p.mouseY, 0, p.height, -50, 50) * factorB * movementScale;
+      p.map(mousePos.y, 0, p.height, -50, 50) * factorB * movementScale;
 
     const rectA = a.corners.map((c) => ({
       x: c.x + offsetAX,
@@ -108,7 +111,8 @@ export const rectTunnelSketch = (
   w: number,
   h: number,
   scrollRef?: RefObject<number>,
-  zoomRef?: RefObject<number>
+  zoomRef?: RefObject<number>,
+  mousePosRef?: RefObject<{ x: number; y: number }>
 ) => {
   const rects: Rect[] = [];
   const rectAmount = 10;
@@ -120,6 +124,9 @@ export const rectTunnelSketch = (
 
   let minZoom = 1;
   let maxZoom = 1;
+
+  let defaultMousePos = { x: p.mouseX, y: p.mouseY };
+  let mousePos = { x: 0, y: 0 };
 
   p.setup = async () => {
     customFont = await p.loadFont("/fonts/Space_Grotesk.ttf");
@@ -141,6 +148,12 @@ export const rectTunnelSketch = (
 
     minZoom = 1;
     maxZoom = outerRectWidth / innerRectWidth;
+
+    if (mousePosRef?.current) {
+      mousePos = mousePosRef.current;
+    } else {
+      mousePos = defaultMousePos;
+    }
 
     if (zoomRef?.current) {
       zoom = zoomRef.current;
@@ -172,10 +185,10 @@ export const rectTunnelSketch = (
       const t = i / (rects.length - 1);
       const color = p.color(255, p.lerp(0, 40, t));
 
-      drawRectFace(p, rects[i], movementScale, zoom, color);
+      drawRectFace(p, rects[i], movementScale, zoom, mousePos, color);
     }
 
     // ❗ now draw ALL lines in ONE call
-    drawBatchedLines(p, rects, movementScale, zoom, linesBetween);
+    drawBatchedLines(p, rects, movementScale, zoom, mousePos, linesBetween);
   };
 };
